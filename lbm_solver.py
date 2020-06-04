@@ -167,7 +167,7 @@ class lbm_solver:
             img = cm.plasma(self.display_var.to_numpy() / 0.15)
             gui.set_image(img)
             gui.show()
-            if (i % 100 == 0):
+            if (i % 1000 == 0):
                 print('Step: {:}'.format(i))
                 # ti.imwrite((img[:,:,0:3]*255).astype(np.uint8), 'fig/karman_'+str(i).zfill(6)+'.png')
 
