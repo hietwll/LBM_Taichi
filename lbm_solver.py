@@ -1,6 +1,6 @@
 # Fluid solver based on lattice boltzmann method using taichi language
 # About taichi : https://github.com/taichi-dev/taichi
-# Author : Wang (zjuwangzhuo@zju.edu.cn)
+# Author : Wang (hietwll@gmail.com)
 
 import taichi as ti
 import numpy as np
