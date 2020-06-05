@@ -27,7 +27,7 @@ lbm = lbm_solver(256, 256, 0.0255, [0, 0, 0, 0],
 Here ``Re = U * (nx-1) * dx / niu = 0.1 * 255.0 / 0.0255``. The velocity magnitude is shown in the contour below and x-componet of velocity in the middle line is compared with literature results.
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/lid.gif" height="293px"> <img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/lid_validation.png" height="293px">
+<img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/lid.gif" height="240px"> <img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/lid_validation.png" height="293px">
 </div>
 
 ## Example2: Kármán Vortex Street
