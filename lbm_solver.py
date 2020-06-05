@@ -183,7 +183,7 @@ if __name__ == '__main__':
              [[0.1, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
              1,[80.0, 50.0, 10.0])
         lbm.solve()
-    elif (flow_case == 1):  # lid driven cavity flow: Re = U*L/niu = 1000
+    elif (flow_case == 1):  # lid-driven cavity flow: Re = U*L/niu = 1000
         lbm = lbm_solver(256, 256, 0.0255, [0, 0, 0, 0],
                          [[0.0, 0.0], [0.1, 0.0], [0.0, 0.0], [0.0, 0.0]])
         lbm.solve()
