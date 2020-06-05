@@ -16,7 +16,7 @@ The meanning of each parameter is:
 
 ## Example1: Lid-driven Cavity Flow
 <div align="center">
-<img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/LidDrivenCavity.png" height="400px">
+<img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/LidDrivenCavity.png" height="300px">
 </div>
 
 Lid-driven cavity flow is benchmark fluid-dynamics problem used to verificate the solver. To compare simulation results based on different unit-systems, the flow Reynolds number ``Re`` should keep the same. For this flow, ``Re`` is defined as ``Re = U * L / niu``, so a solver with `` Re = 1000 `` can be given by:
@@ -27,7 +27,7 @@ lbm = lbm_solver(256, 256, 0.0255, [0, 0, 0, 0],
 Here ``Re = U * (nx-1) * dx / niu = 0.1 * 255.0 / 0.0255``. The velocity magnitude is shown in the contour below and x-componet of velocity in the middle line is compared with literature results.
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/lid.gif" height="240px"> <img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/lid_validation.png" height="293px">
+<img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/lid.gif" height="240px"> <img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/lid_validation.png" height="240px">
 </div>
 
 ## Example2: Kármán Vortex Street
