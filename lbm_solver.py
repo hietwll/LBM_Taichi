@@ -4,6 +4,7 @@
 
 import taichi as ti
 import numpy as np
+import matplotlib
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
@@ -28,7 +29,6 @@ class lbm_solver:
         self.rho = ti.var(dt=ti.f32, shape=(nx, ny))
         self.vel = ti.Vector(2, dt=ti.f32, shape=(nx, ny))
         self.mask = ti.var(dt=ti.f32, shape=(nx, ny))
-        self.display_var = ti.var(dt=ti.f32, shape=(nx, ny))
         self.f_old = ti.Vector(9, dt=ti.f32, shape=(nx, ny))
         self.f_new = ti.Vector(9, dt=ti.f32, shape=(nx, ny))
         self.w = ti.var(dt=ti.f32, shape=9)
@@ -69,7 +69,6 @@ class lbm_solver:
                 if ((ti.cast(i, ti.f32) - self.cy_para[0])**2.0 + (ti.cast(j, ti.f32)
                     - self.cy_para[1])**2.0 <= self.cy_para[2]**2.0):
                     self.mask[i, j] = 1.0
-
 
     @ti.kernel
     def collide_and_stream(self): # lbm core equation
@@ -146,25 +145,28 @@ class lbm_solver:
             self.f_old[ibc,jbc][k] = self.f_eq(ibc,jbc,k) - self.f_eq(inb,jnb,k) + \
                                         self.f_old[inb,jnb][k]
 
-    @ti.kernel
-    def get_display_var(self, flg: ti.i32):
-        if (flg == 0): # get velocity magnitude
-            for i, j in ti.ndrange(self.nx, self.ny):
-                self.display_var[i, j] = ti.sqrt(self.vel[i, j][0]**2.0 +
-                                                 self.vel[i, j][1]**2.0)
-        elif (flg == 1): # get x-direction component only
-            for i, j in ti.ndrange(self.nx, self.ny):
-                self.display_var[i, j] = self.vel[i, j][0]
-
     def solve(self):
-        gui = ti.GUI('lbm solver', (self.nx, self.ny))
+        gui = ti.GUI('lbm solver', (self.nx, 2.0*self.ny))
         self.init()
         for i in range(self.steps):
             self.collide_and_stream()
             self.update_macro_var()
             self.apply_bc()
-            self.get_display_var(0)
-            img = cm.plasma(self.display_var.to_numpy() / 0.15)
+            ##  code fragment displaying vorticity is contributed by woclass
+            vel = self.vel.to_numpy()
+            ugrad = np.gradient(vel[:, :, 0])
+            vgrad = np.gradient(vel[:, :, 1])
+            vor = ugrad[1] - vgrad[0]
+            vel_mag = (vel[:, :, 0]**2.0+vel[:, :, 1]**2.0)**0.5
+            ## color map
+            colors = [(1, 1, 0), (0.953, 0.490, 0.016), (0, 0, 0),
+                (0.176, 0.976, 0.529), (0, 1, 1)]
+            my_cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
+                'my_cmap', colors)
+            vor_img = cm.ScalarMappable(norm=matplotlib.colors.Normalize(
+                vmin=-0.02, vmax=0.02),cmap=my_cmap).to_rgba(vor)
+            vel_img = cm.plasma(vel_mag / 0.15)
+            img = np.concatenate((vor_img, vel_img), axis=1)
             gui.set_image(img)
             gui.show()
             if (i % 1000 == 0):
@@ -172,22 +174,19 @@ class lbm_solver:
                 # ti.imwrite((img[:,:,0:3]*255).astype(np.uint8), 'fig/karman_'+str(i).zfill(6)+'.png')
 
     def pass_to_py(self):
-        self.get_display_var(1)
-        return self.display_var.to_numpy()
-
+        return self.vel.to_numpy()[:,:,0]
 
 if __name__ == '__main__':
     flow_case = 0
     if (flow_case == 0):  # von Karman vortex street: Re = U*D/niu = 200
-        lbm = lbm_solver(401, 101, 0.005, [0, 0, 1, 0],
+        lbm = lbm_solver(801, 201, 0.01, [0, 0, 1, 0],
              [[0.1, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
-             1,[80.0, 50.0, 10.0])
+             1,[160.0, 100.0, 20.0])
         lbm.solve()
     elif (flow_case == 1):  # lid-driven cavity flow: Re = U*L/niu = 1000
         lbm = lbm_solver(256, 256, 0.0255, [0, 0, 0, 0],
                          [[0.0, 0.0], [0.1, 0.0], [0.0, 0.0], [0.0, 0.0]])
         lbm.solve()
-
         # compare with literature results
         y_ref, u_ref = np.loadtxt('data/ghia1982.dat', unpack=True, skiprows=2, usecols=(0, 2))
         fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(4, 3), dpi=200)
