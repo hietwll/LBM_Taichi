@@ -43,5 +43,5 @@ lbm = lbm_solver(401, 101, 0.005, [0, 0, 1, 0],
 ```
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/karman.gif" height="400px">
+<img src="https://raw.githubusercontent.com/hietwll/common_files/master/graphics/lbm_taichi/karman.gif" height="250px">
 </div>
