@@ -26,17 +26,17 @@ class lbm_solver:
         self.niu = niu
         self.tau = 3.0 * niu + 0.5
         self.inv_tau = 1.0 / self.tau
-        self.rho = ti.var(dt=ti.f32, shape=(nx, ny))
-        self.vel = ti.Vector(2, dt=ti.f32, shape=(nx, ny))
-        self.mask = ti.var(dt=ti.f32, shape=(nx, ny))
-        self.f_old = ti.Vector(9, dt=ti.f32, shape=(nx, ny))
-        self.f_new = ti.Vector(9, dt=ti.f32, shape=(nx, ny))
-        self.w = ti.var(dt=ti.f32, shape=9)
-        self.e = ti.var(dt=ti.i32, shape=(9, 2))
-        self.bc_type = ti.var(dt=ti.i32, shape=4)
-        self.bc_value = ti.var(dt=ti.f32, shape=(4, 2))
+        self.rho = ti.field(dtype=ti.f32, shape=(nx, ny))
+        self.vel = ti.Vector.field(2, dtype=ti.f32, shape=(nx, ny))
+        self.mask = ti.field(dtype=ti.f32, shape=(nx, ny))
+        self.f_old = ti.Vector.field(9, dtype=ti.f32, shape=(nx, ny))
+        self.f_new = ti.Vector.field(9, dtype=ti.f32, shape=(nx, ny))
+        self.w = ti.field(dtype=ti.f32, shape=9)
+        self.e = ti.field(dtype=ti.i32, shape=(9, 2))
+        self.bc_type = ti.field(dtype=ti.i32, shape=4)
+        self.bc_value = ti.field(dtype=ti.f32, shape=(4, 2))
         self.cy = cy
-        self.cy_para = ti.var(dt=ti.f32, shape=3)
+        self.cy_para = ti.field(dtype=ti.f32, shape=3)
         self.bc_type.from_numpy(np.array(bc_type, dtype=np.int32))
         self.bc_value.from_numpy(np.array(bc_value, dtype=np.float32))
         self.cy_para.from_numpy(np.array(cy_para, dtype=np.float32))
@@ -50,7 +50,7 @@ class lbm_solver:
 
     @ti.func # compute equilibrium distribution function
     def f_eq(self, i, j, k):
-        eu = ti.cast(self.e[k, 0], ti.f32) * self.vel[i, j][0] + ti.cast(self.e[k, 1], 
+        eu = ti.cast(self.e[k, 0], ti.f32) * self.vel[i, j][0] + ti.cast(self.e[k, 1],
             ti.f32) * self.vel[i, j][1]
         uv = self.vel[i, j][0]**2.0 + self.vel[i, j][1]**2.0
         return self.w[k] * self.rho[i, j] * (1.0 + 3.0 * eu + 4.5 * eu**2 - 1.5 * uv)
@@ -115,9 +115,9 @@ class lbm_solver:
 
         # cylindrical obstacle
         # Note: for cuda backend, putting 'if statement' inside loops can be much faster!
-        for i, j in ti.ndrange(self.nx, self.ny): 
+        for i, j in ti.ndrange(self.nx, self.ny):
             if (self.cy == 1 and self.mask[i, j] == 1):
-                self.vel[i, j][0] = 0.0  # velocity is zero at solid boundary  
+                self.vel[i, j][0] = 0.0  # velocity is zero at solid boundary
                 self.vel[i, j][1] = 0.0
                 inb = 0
                 jnb = 0
@@ -146,7 +146,7 @@ class lbm_solver:
                                         self.f_old[inb,jnb][k]
 
     def solve(self):
-        gui = ti.GUI('lbm solver', (self.nx, 2.0*self.ny))
+        gui = ti.GUI('lbm solver', (self.nx, 2 * self.ny))
         self.init()
         for i in range(self.steps):
             self.collide_and_stream()
